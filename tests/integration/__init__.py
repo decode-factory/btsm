@@ -1,0 +1,1 @@
+# Empty init file to make the integration tests directory a package

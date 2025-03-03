@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  trading:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: btsm-trading
+    volumes:
+      - ../data:/app/data
+      - ../logs:/app/logs
+      - ../reports:/app/reports
+      - ../config:/app/config
+    environment:
+      - TRADING_LOG_LEVEL=INFO
+      - TRADING_PAPER_TRADING=true
+      - TZ=Asia/Kolkata
+    command: ["--mode", "paper", "--config", "config/config.ini"]
+    restart: unless-stopped
+
+  backtesting:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: btsm-backtest
+    volumes:
+      - ../data:/app/data
+      - ../logs:/app/logs
+      - ../reports:/app/reports
+      - ../config:/app/config
+    environment:
+      - TRADING_LOG_LEVEL=INFO
+      - TZ=Asia/Kolkata
+    command: ["--mode", "backtest", "--config", "config/config.ini", "--report", "--start-date", "2023-01-01", "--end-date", "2023-12-31"]
+    profiles:
+      - backtest
+
+  dev:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: btsm-dev
+    volumes:
+      - ..:/app
+    environment:
+      - TRADING_LOG_LEVEL=DEBUG
+      - TRADING_PAPER_TRADING=true
+      - TZ=Asia/Kolkata
+    command: ["--mode", "paper", "--config", "config/config.ini"]
+    profiles:
+      - dev
+    
+networks:
+  default:
+    name: btsm-network
