@@ -269,6 +269,7 @@ def main():
     if args.mode == 'backtest':
         # Determine date range
         end_date = args.end_date or datetime.now().strftime('%Y-%m-%d')
+        # For comprehensive backtesting, use 52 weeks (1 year) of data by default
         start_date = args.start_date or (datetime.strptime(end_date, '%Y-%m-%d') - timedelta(days=365)).strftime('%Y-%m-%d')
         
         # Run backtest
