@@ -1,5 +1,5 @@
-# Use a conda-based Python image
-FROM continuumio/miniconda3:latest
+# Use an official Python runtime as the base image
+FROM python:3.10
 
 # Set the working directory
 WORKDIR /app
@@ -7,6 +7,7 @@ WORKDIR /app
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
     PYTHONPATH=/app
 
 # Install system dependencies
@@ -21,18 +22,30 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install TA-Lib using conda (much more reliable than pip)
-RUN conda install -y -c conda-forge ta-lib python=3.10
+# Install TA-Lib C library from source
+RUN wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz && \
+    tar -xzf ta-lib-0.4.0-src.tar.gz && \
+    cd ta-lib && \
+    ./configure --prefix=/usr && \
+    make && \
+    make install && \
+    cd .. && \
+    rm -rf ta-lib ta-lib-0.4.0-src.tar.gz && \
+    ldconfig
 
 # Copy requirements file
 COPY requirements.txt /app/
 
-# Create a modified requirements file without TA-Lib (as we've installed it via conda)
+# Create a modified requirements file without TA-Lib (we'll install it separately)
 RUN grep -v "ta-lib" requirements.txt > requirements_modified.txt
 
 # Install Python dependencies (without TA-Lib)
 RUN pip install --upgrade pip && \
     pip install -r requirements_modified.txt
+
+# Install TA-Lib using a pre-compiled wheel instead of building from source
+RUN pip install --no-cache-dir numpy && \
+    pip install --no-cache-dir https://files.pythonhosted.org/packages/68/d8/b6db77e8fae09ab06e68969f5efbdd4bc0b233786563ba30e8891f2a987e/TA_Lib-0.4.26-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
 
 # Copy the project files
 COPY . /app/

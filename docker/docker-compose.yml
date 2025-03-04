@@ -1,6 +1,15 @@
 version: '3.8'
 
 services:
+  talib-test:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: btsm-talib-test
+    entrypoint: python
+    command: -c "import talib; print('TA-Lib version:', talib.__version__)"
+    restart: "no"
+
   trading:
     build:
       context: ..
@@ -15,7 +24,8 @@ services:
       - TRADING_LOG_LEVEL=INFO
       - TRADING_PAPER_TRADING=true
       - TZ=Asia/Kolkata
-    command: ["--mode", "paper", "--config", "config/config.ini"]
+    entrypoint: python
+    command: ["main.py", "--mode", "paper", "--config", "config/config.ini"]
     restart: unless-stopped
 
   backtesting:
@@ -31,7 +41,8 @@ services:
     environment:
       - TRADING_LOG_LEVEL=INFO
       - TZ=Asia/Kolkata
-    command: ["--mode", "backtest", "--config", "config/config.ini", "--report", "--start-date", "2023-01-01", "--end-date", "2023-12-31"]
+    entrypoint: python
+    command: ["main.py", "--mode", "backtest", "--config", "config/config.ini", "--report", "--start-date", "2023-01-01", "--end-date", "2023-12-31"]
     profiles:
       - backtest
 
@@ -46,7 +57,8 @@ services:
       - TRADING_LOG_LEVEL=DEBUG
       - TRADING_PAPER_TRADING=true
       - TZ=Asia/Kolkata
-    command: ["--mode", "paper", "--config", "config/config.ini"]
+    entrypoint: python
+    command: ["main.py", "--mode", "paper", "--config", "config/config.ini"]
     profiles:
       - dev
     
