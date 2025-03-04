@@ -90,12 +90,7 @@ class StrategyTrainer:
                                 'position_size_pct': position_size
                             }
                             
-                            strategy = MovingAverageCrossover('ma_optimizer', self.config)
-                            strategy.fast_ma_type = fast_type
-                            strategy.fast_ma_period = fast_period
-                            strategy.slow_ma_type = slow_type
-                            strategy.slow_ma_period = slow_period
-                            strategy.position_size_pct = position_size
+                            strategy = MovingAverageCrossover(params)
                             
                             # Run backtest
                             try:
@@ -188,11 +183,7 @@ class StrategyTrainer:
                             'position_size_pct': position_size
                         }
                         
-                        strategy = RSIStrategy('rsi_optimizer', self.config)
-                        strategy.rsi_period = rsi_period
-                        strategy.overbought_threshold = overbought
-                        strategy.oversold_threshold = oversold
-                        strategy.position_size_pct = position_size
+                        strategy = RSIStrategy(params)
                         
                         # Run backtest
                         try:
@@ -259,19 +250,23 @@ class StrategyTrainer:
         
         # Create strategy with the given parameters
         if strategy_type == 'moving_average':
-            strategy = MovingAverageCrossover('ma_evaluator', self.config)
-            strategy.fast_ma_type = params.get('fast_ma_type', 'EMA')
-            strategy.fast_ma_period = params.get('fast_ma_period', 20)
-            strategy.slow_ma_type = params.get('slow_ma_type', 'SMA')
-            strategy.slow_ma_period = params.get('slow_ma_period', 50)
-            strategy.position_size_pct = params.get('position_size_pct', 5)
+            eval_params = {
+                'fast_ma_type': params.get('fast_ma_type', 'EMA'),
+                'fast_ma_period': params.get('fast_ma_period', 20),
+                'slow_ma_type': params.get('slow_ma_type', 'SMA'),
+                'slow_ma_period': params.get('slow_ma_period', 50),
+                'position_size_pct': params.get('position_size_pct', 5)
+            }
+            strategy = MovingAverageCrossover(eval_params)
             
         elif strategy_type == 'rsi':
-            strategy = RSIStrategy('rsi_evaluator', self.config)
-            strategy.rsi_period = params.get('rsi_period', 14)
-            strategy.overbought_threshold = params.get('overbought_threshold', 70)
-            strategy.oversold_threshold = params.get('oversold_threshold', 30)
-            strategy.position_size_pct = params.get('position_size_pct', 5)
+            eval_params = {
+                'rsi_period': params.get('rsi_period', 14),
+                'overbought_threshold': params.get('overbought_threshold', 70),
+                'oversold_threshold': params.get('oversold_threshold', 30),
+                'position_size_pct': params.get('position_size_pct', 5)
+            }
+            strategy = RSIStrategy(eval_params)
             
         else:
             raise ValueError(f"Unknown strategy type: {strategy_type}")

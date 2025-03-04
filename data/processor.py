@@ -57,11 +57,42 @@ class DataProcessor:
         
         # Calculate technical indicators
         try:
-            # Moving Averages
+            # Moving Averages - add all variations needed for strategies
+            # Standard SMA periods
+            result['sma_5'] = self.indicators.sma(result['close'], 5)
+            result['sma_10'] = self.indicators.sma(result['close'], 10)
+            result['sma_15'] = self.indicators.sma(result['close'], 15)
             result['sma_20'] = self.indicators.sma(result['close'], 20)
+            result['sma_30'] = self.indicators.sma(result['close'], 30)
+            result['sma_40'] = self.indicators.sma(result['close'], 40)
             result['sma_50'] = self.indicators.sma(result['close'], 50)
+            result['sma_60'] = self.indicators.sma(result['close'], 60)
+            result['sma_80'] = self.indicators.sma(result['close'], 80)
+            result['sma_100'] = self.indicators.sma(result['close'], 100)
+            result['sma_120'] = self.indicators.sma(result['close'], 120)
+            result['sma_140'] = self.indicators.sma(result['close'], 140)
+            result['sma_160'] = self.indicators.sma(result['close'], 160)
+            result['sma_180'] = self.indicators.sma(result['close'], 180)
             result['sma_200'] = self.indicators.sma(result['close'], 200)
             
+            # Standard EMA periods
+            result['ema_5'] = self.indicators.ema(result['close'], 5)
+            result['ema_10'] = self.indicators.ema(result['close'], 10)
+            result['ema_15'] = self.indicators.ema(result['close'], 15)
+            result['ema_20'] = self.indicators.ema(result['close'], 20)
+            result['ema_30'] = self.indicators.ema(result['close'], 30)
+            result['ema_40'] = self.indicators.ema(result['close'], 40)
+            result['ema_50'] = self.indicators.ema(result['close'], 50)
+            result['ema_60'] = self.indicators.ema(result['close'], 60)
+            result['ema_80'] = self.indicators.ema(result['close'], 80)
+            result['ema_100'] = self.indicators.ema(result['close'], 100)
+            result['ema_120'] = self.indicators.ema(result['close'], 120)
+            result['ema_140'] = self.indicators.ema(result['close'], 140)
+            result['ema_160'] = self.indicators.ema(result['close'], 160)
+            result['ema_180'] = self.indicators.ema(result['close'], 180)
+            result['ema_200'] = self.indicators.ema(result['close'], 200)
+            
+            # MACD standard inputs
             result['ema_12'] = self.indicators.ema(result['close'], 12)
             result['ema_26'] = self.indicators.ema(result['close'], 26)
             
@@ -71,8 +102,13 @@ class DataProcessor:
             result['macd_signal'] = macd_data['signal']
             result['macd_hist'] = macd_data['histogram']
             
-            # RSI
+            # RSI periods
+            result['rsi_7'] = self.indicators.rsi(result['close'], 7)
+            result['rsi_10'] = self.indicators.rsi(result['close'], 10)
+            result['rsi_13'] = self.indicators.rsi(result['close'], 13)
             result['rsi_14'] = self.indicators.rsi(result['close'], 14)
+            result['rsi_16'] = self.indicators.rsi(result['close'], 16)
+            result['rsi_19'] = self.indicators.rsi(result['close'], 19)
             
             # Bollinger Bands
             bb_data = self.indicators.bollinger_bands(result['close'])
