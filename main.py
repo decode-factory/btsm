@@ -14,8 +14,8 @@ from strategies.moving_average import MovingAverageCrossover
 from strategies.rsi_strategy import RSIStrategy
 from execution.paper_trading import PaperTradingBroker
 from execution.zerodha import ZerodhaInterface
-from execution.upstox import UpstoxInterface
-from execution.fivepaisa import FivePaisaInterface
+from execution.upstox import UpstoxBroker
+from execution.fivepaisa import FivePaisaBroker
 from reporting.metrics import PerformanceMetrics
 from reporting.visualization import TradeVisualizer
 from utils.logger import configure_logging
@@ -104,9 +104,9 @@ def setup_broker(agent: Agent, broker_name: str, config: Dict[str, Any]) -> None
     elif broker_name == 'zerodha':
         broker = ZerodhaInterface(config)
     elif broker_name == 'upstox':
-        broker = UpstoxInterface(config)
+        broker = UpstoxBroker(config)
     elif broker_name == 'fivepaisa':
-        broker = FivePaisaInterface(config)
+        broker = FivePaisaBroker(config)
     else:
         raise ValueError(f"Unsupported broker: {broker_name}")
     

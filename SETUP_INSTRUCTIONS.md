@@ -1,178 +1,151 @@
-# BTSM Setup Instructions
+# BTSM (Backtesting & Trading Strategy Manager) Setup Guide
 
-This document provides detailed instructions for setting up and running the BTSM (Backtesting & Trading Strategy Manager) system.
+## Prerequisites
+- Python 3.8+ 
+- pip or conda for package management
+- Git (for cloning the repository)
+- For Upstox integration: Upstox API credentials (API key and secret)
 
-## System Requirements
+## Step 1: Installation
 
-- Python 3.10 or higher
-- 4GB RAM minimum (8GB recommended)
-- 2GB free disk space
-- Internet connection for live data
-
-## Installation Steps
-
-### 1. Install Dependencies
-
-#### Ubuntu/Debian:
+### Clone the Repository
 ```bash
-sudo apt-get update
-sudo apt-get install -y python3-dev python3-pip python3-venv build-essential git
-
-# Install TA-Lib dependencies
-sudo apt-get install -y build-essential
-wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz
-tar -xzf ta-lib-0.4.0-src.tar.gz
-cd ta-lib/
-./configure --prefix=/usr
-make
-sudo make install
-cd ..
-rm -rf ta-lib ta-lib-0.4.0-src.tar.gz
+git clone https://github.com/yourusername/BTSM.git
+cd BTSM
 ```
 
-#### macOS (using Homebrew):
+### Using pip (Recommended for most users)
 ```bash
-brew install python ta-lib
-```
-
-#### Windows:
-- Install Python from the [official website](https://www.python.org/downloads/)
-- Download and install the unofficial TA-Lib wheels from [here](https://www.lfd.uci.edu/~gohlke/pythonlibs/#ta-lib)
-```bash
-pip install PATH_TO_DOWNLOADED_WHEEL
-```
-
-### 2. Create Virtual Environment
-
-```bash
+# Create a virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
 
-### 3. Install Python Dependencies
+# Activate the virtual environment
+# On Windows:
+venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
 
-```bash
+# Install dependencies
 pip install -r requirements.txt
+
+# Install python-dotenv if not included in requirements
+pip install python-dotenv
 ```
 
-### 4. Configure the System
-
-1. Edit `config/config.ini` to set your preferences:
-   - API credentials for brokers
-   - Trading parameters
-   - Risk management settings
-   - Data sources
-
-2. For paper trading, no additional setup is required.
-
-3. For live trading, you'll need to:
-   - Obtain API keys from your broker
-   - Add them to your config file or use environment variables
-   - Ensure you have sufficient funds in your trading account
-
-## Running the System
-
-### Basic Commands
-
-#### Run Backtesting:
+### Using Docker (Alternative)
 ```bash
-python main.py --mode backtest --strategy moving_average --start-date 2023-01-01 --end-date 2023-12-31 --report
-```
-
-#### Run Paper Trading:
-```bash
-python main.py --mode paper --strategy rsi
-```
-
-#### Run Live Trading:
-```bash
-python main.py --mode live --broker zerodha --strategy moving_average
-```
-
-### Command-Line Arguments
-
-| Argument | Description | Default | Options |
-|----------|-------------|---------|---------|
-| `--mode` | Trading mode | `paper` | `backtest`, `paper`, `live` |
-| `--config` | Config file path | `config/config.ini` | Any path |
-| `--strategy` | Strategy to use | `all` | `moving_average`, `rsi`, `all` |
-| `--start-date` | Backtest start date | (1 year ago) | Any date in YYYY-MM-DD format |
-| `--end-date` | Backtest end date | (today) | Any date in YYYY-MM-DD format |
-| `--symbols` | Symbols to trade | (from config) | Comma-separated list |
-| `--broker` | Broker to use | `paper` | `zerodha`, `upstox`, `fivepaisa` |
-| `--report` | Generate report | Not set | Flag, no value needed |
-| `--report-file` | Report filename | `trading_report.html` | Any path |
-
-## Running via Docker
-
-### Build the Docker Image:
-```bash
+# Build the Docker image
 docker build -t btsm -f docker/Dockerfile .
+
+# Run the container
+docker run -it --name btsm-container btsm
 ```
 
-### Run with Docker Compose:
+## Step 2: Configuration
+
+### API Credentials Setup
+1. Edit `config/config.ini` with your broker API credentials:
+   ```ini
+   [brokers]
+   # Upstox API credentials
+   upstox_api_key = your_upstox_api_key_here
+   upstox_api_secret = your_upstox_api_secret_here
+   ```
+
+2. For Upstox specific setup:
+   - Create a `.env` file in the project root with the following content:
+   ```
+   UPSTOX_API_KEY=your_upstox_api_key_here
+   UPSTOX_API_SECRET=your_upstox_api_secret_here
+   UPSTOX_REDIRECT_URL=http://localhost:5000/callback
+   ```
+
+### Obtaining Upstox API Credentials
+1. Register as a developer on the [Upstox Developer Portal](https://developer.upstox.com/)
+2. Create a new application to get API credentials
+3. Use the following for the redirect URL: `http://localhost:5000/callback`
+4. Copy the obtained API key and secret to your config files
+
+## Step 3: Running the Application
+
+### Backtesting Mode
 ```bash
-docker-compose -f docker/docker-compose.yml up trading
+# Test all strategies
+python main.py --mode backtest --broker upstox --strategy all --report
+
+# Test a specific strategy
+python main.py --mode backtest --broker upstox --strategy moving_average --report
 ```
 
-### Run Backtesting in Container:
+### Paper Trading Mode
 ```bash
-docker-compose -f docker/docker-compose.yml --profile backtest up backtesting
+python main.py --mode paper_trading --broker upstox --strategy moving_average
 ```
 
-### Run Development Environment:
+### Live Trading Mode (use with caution)
 ```bash
-docker-compose -f docker/docker-compose.yml --profile dev up dev
+python main.py --mode live --broker upstox --strategy moving_average
 ```
 
-## Running Tests
+## Step 4: Implementing Custom Strategies
 
-### Run All Tests:
-```bash
-pytest
-```
+1. Create a new file in the `strategies` directory
+2. Inherit from the base Strategy class
+3. Implement the required methods:
+   - `__init__`: Initialize your strategy
+   - `generate_signals`: Implement your trading logic
+   - `calculate_position_size`: Define position sizing rules
 
-### Run Unit Tests Only:
-```bash
-pytest tests/unit
-```
+Example:
+```python
+from strategies.base import Strategy
 
-### Run Integration Tests Only:
-```bash
-pytest tests/integration
-```
-
-### Generate Test Coverage Report:
-```bash
-pytest --cov=./ --cov-report=html
+class MyCustomStrategy(Strategy):
+    def __init__(self, config, broker):
+        super().__init__("MyCustomStrategy", config, broker)
+        # Initialize strategy-specific parameters
+        
+    def generate_signals(self, data):
+        # Implement your trading logic
+        # Return buy/sell signals
+        
+    def calculate_position_size(self, signal, price):
+        # Implement position sizing logic
+        # Return the number of shares/contracts to trade
 ```
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **TA-Lib Installation Errors**:
-   - On Ubuntu/Debian, ensure you have `build-essential` installed
-   - On Windows, use the precompiled wheel instead of pip install
+1. **ModuleNotFoundError: No module named 'dotenv'**
+   - Solution: Install python-dotenv package: `pip install python-dotenv`
 
-2. **API Connection Issues**:
-   - Check your API credentials in the config file
-   - Ensure your broker's API services are operational
-   - Check network connectivity and firewall settings
+2. **API Connection Issues**
+   - Verify your API credentials in config.ini and .env files
+   - Check if your Upstox redirect URL matches what's registered in the developer portal
+   - Ensure your API key has the necessary permissions
 
-3. **Data Availability**:
-   - Some symbols may not have data for the requested time period
-   - Financial markets have holidays when no data is available
+3. **NoneType errors in trading loop**
+   - This often indicates issues with data processing or missing market data
+   - Check your historical data sources and ensure symbols are properly configured
 
-### Logs
+4. **Docker-related issues**
+   - See the DOCKER_GUIDE.md file for detailed Docker troubleshooting
 
-- Check `logs/trading.log` for detailed operation logs
-- Performance reports are saved in the `reports/` directory
-- Visualizations are saved in `reports/visualizations/`
+### Getting Help
+- Check the project's GitHub repository for issues and discussions
+- Open an issue for bugs or enhancement requests
 
-## Contact for Support
+## Understanding the System Architecture
 
-If you encounter issues not covered in this document:
-- Open an issue on GitHub
-- Email support at [your-email@example.com]
-- Join our community Discord/Slack
+The BTSM system consists of several key components:
+
+1. **Core**: Central event system and agent management
+2. **Data**: Market data collection and processing
+3. **Analysis**: Technical indicators and prediction models
+4. **Strategies**: Trading strategy implementation
+5. **Execution**: Broker interfaces for different platforms
+6. **Reporting**: Performance metrics and visualization
+
+Refer to the README.md for a detailed overview of the system architecture.
